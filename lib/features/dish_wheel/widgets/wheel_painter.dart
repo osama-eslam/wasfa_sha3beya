@@ -7,8 +7,14 @@ class DishWheelPainter extends CustomPainter {
   final List<DishPerson> people;
   final List<ui.Image> images;
   final DishPerson? selected;
+  final ColorScheme colorScheme;
 
-  DishWheelPainter(this.people, this.images, this.selected);
+  DishWheelPainter(
+    this.people,
+    this.images,
+    this.selected,
+    this.colorScheme,
+  );
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -24,12 +30,12 @@ class DishWheelPainter extends CustomPainter {
           radius,
           i % 2 == 0
               ? [
-                  Colors.teal.shade300.withValues(alpha: 0.8),
-                  Colors.teal.shade600.withValues(alpha: 0.9),
+                  colorScheme.primary.withValues(alpha: 0.85),
+                  colorScheme.primary.withValues(alpha: 0.95),
                 ]
               : [
-                  Colors.cyan.shade300.withValues(alpha: 0.8),
-                  Colors.cyan.shade600.withValues(alpha: 0.9),
+                  colorScheme.tertiary.withValues(alpha: 0.85),
+                  colorScheme.tertiary.withValues(alpha: 0.95),
                 ],
         )
         ..style = PaintingStyle.fill;
@@ -37,6 +43,16 @@ class DishWheelPainter extends CustomPainter {
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
         i * segment, segment, true, paint,
+      );
+
+      final strokePaint = Paint()
+        ..color = colorScheme.secondary.withValues(alpha: 0.4)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5;
+
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        i * segment, segment, true, strokePaint,
       );
 
       final angle = i * segment + segment / 2;
@@ -52,6 +68,23 @@ class DishWheelPainter extends CustomPainter {
         );
       }
     }
+
+    final centerPaint = Paint()
+      ..color = colorScheme.surface
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, radius * 0.12, centerPaint);
+
+    final centerBorderPaint = Paint()
+      ..color = colorScheme.secondary
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5;
+    canvas.drawCircle(center, radius * 0.12, centerBorderPaint);
+
+    final outerBorderPaint = Paint()
+      ..color = colorScheme.secondary.withValues(alpha: 0.6)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3;
+    canvas.drawCircle(center, radius, outerBorderPaint);
   }
 
   @override

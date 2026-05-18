@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:wasfa_sha3beya/core/app_constants.dart';
 import 'package:wasfa_sha3beya/core/services/image_service.dart';
 import 'package:wasfa_sha3beya/core/widgets/fade_in_slide.dart';
 import 'package:wasfa_sha3beya/core/widgets/info_box.dart';
 import 'package:wasfa_sha3beya/data/models/recipe.dart';
+import 'package:wasfa_sha3beya/features/favorites/controllers/favorites_controller.dart';
 
 class RecipeDetailPage extends StatelessWidget {
   final Recipe recipe;
@@ -11,13 +13,14 @@ class RecipeDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final favCtrl = Get.find<FavoritesController>();
     return Scaffold(
-      backgroundColor: Colors.grey[50],
       body: Stack(
         children: [
           Positioned.fill(
             child: Opacity(
-              opacity: 0.15,
+              opacity: 0.08,
               child: ImageService.assetImage(
                 AppConstants.backgroundImage, fit: BoxFit.cover,
               ),
@@ -25,31 +28,32 @@ class RecipeDetailPage extends StatelessWidget {
           ),
           CustomScrollView(
             slivers: [
-              _buildSliverAppBar(context),
+              _buildSliverAppBar(context, theme, favCtrl),
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      FadeInSlide(delay: 200, child: _buildInfoSection()),
+                      FadeInSlide(delay: 200, child: _buildInfoSection(theme)),
                       const SizedBox(height: 20),
                       FadeInSlide(
                         delay: 300,
-                        child: _buildSectionTitle(context, 'عن الطبق'),
+                        child: _buildSectionTitle(context, theme, 'عن الطبق'),
                       ),
                       FadeInSlide(
                         delay: 400,
                         child: Card(
                           elevation: 4,
+                          shadowColor: theme.colorScheme.shadow.withValues(alpha: 0.2),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(18),
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(16),
                             child: Text(
                               recipe.shortDescription,
-                              style: const TextStyle(fontSize: 15, height: 1.5),
+                              style: theme.textTheme.bodyLarge?.copyWith(height: 1.5),
                             ),
                           ),
                         ),
@@ -57,20 +61,20 @@ class RecipeDetailPage extends StatelessWidget {
                       const SizedBox(height: 24),
                       FadeInSlide(
                         delay: 500,
-                        child: _buildSectionTitle(context, 'المكونات'),
+                        child: _buildSectionTitle(context, theme, 'المكونات'),
                       ),
                       FadeInSlide(
                         delay: 600,
-                        child: _buildIngredients(recipe.ingredients),
+                        child: _buildIngredients(theme, recipe.ingredients),
                       ),
                       const SizedBox(height: 24),
                       FadeInSlide(
                         delay: 700,
-                        child: _buildSectionTitle(context, 'خطوات التحضير'),
+                        child: _buildSectionTitle(context, theme, 'خطوات التحضير'),
                       ),
                       FadeInSlide(
                         delay: 800,
-                        child: _buildSteps(recipe.steps),
+                        child: _buildSteps(theme, recipe.steps),
                       ),
                       const SizedBox(height: 40),
                     ],
@@ -84,23 +88,43 @@ class RecipeDetailPage extends StatelessWidget {
     );
   }
 
-  SliverAppBar _buildSliverAppBar(BuildContext context) {
+  SliverAppBar _buildSliverAppBar(BuildContext context, ThemeData theme, FavoritesController favCtrl) {
     return SliverAppBar(
       expandedHeight: 330,
       pinned: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: theme.colorScheme.surface,
+      surfaceTintColor: Colors.transparent,
+      actions: [
+        Obx(() {
+          final fav = favCtrl.isFavorite(recipe.id);
+          return Padding(
+            padding: const EdgeInsets.all(8),
+            child: CircleAvatar(
+              backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.8),
+              child: IconButton(
+                icon: Icon(
+                  fav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                  color: fav ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+                  size: 22,
+                ),
+                onPressed: () => favCtrl.toggle(recipe.id),
+              ),
+            ),
+          );
+        }),
+      ],
       flexibleSpace: FlexibleSpaceBar(
         centerTitle: true,
         title: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.black45,
+            color: Colors.black.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             recipe.title,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold, color: Colors.white,
+            style: TextStyle(
+              fontWeight: FontWeight.bold, color: theme.colorScheme.onPrimary,
             ),
           ),
         ),
@@ -122,9 +146,9 @@ class RecipeDetailPage extends StatelessWidget {
               ),
             ),
             Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.black45, Colors.transparent],
+                  colors: [Colors.black.withValues(alpha: 0.6), Colors.transparent],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -136,9 +160,14 @@ class RecipeDetailPage extends StatelessWidget {
       leading: Padding(
         padding: const EdgeInsets.all(8),
         child: CircleAvatar(
-          backgroundColor: Colors.black45,
+          backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.8),
           child: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: Icon(
+              Directionality.of(context) == TextDirection.rtl
+                  ? Icons.arrow_forward_ios
+                  : Icons.arrow_back_ios,
+              color: theme.colorScheme.onSurface,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
         ),
@@ -146,25 +175,29 @@ class RecipeDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoSection() {
+  Widget _buildInfoSection(ThemeData theme) {
     return Card(
-      elevation: 8,
+      elevation: 6,
+      shadowColor: theme.colorScheme.shadow.withValues(alpha: 0.2),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            InfoBox(icon: Icons.schedule, title: 'وقت التحضير', value: recipe.prepTime),
-            InfoBox(icon: Icons.local_fire_department, title: 'وقت الطبخ', value: recipe.cookTime),
-            InfoBox(icon: Icons.category, title: 'النوع', value: recipe.category),
-          ],
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              InfoBox(icon: Icons.schedule, title: 'وقت التحضير', value: recipe.prepTime),
+              InfoBox(icon: Icons.local_fire_department, title: 'وقت الطبخ', value: recipe.cookTime),
+              InfoBox(icon: Icons.category, title: 'النوع', value: recipe.category),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildSectionTitle(BuildContext context, String title) {
+  Widget _buildSectionTitle(BuildContext context, ThemeData theme, String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
@@ -172,16 +205,17 @@ class RecipeDetailPage extends StatelessWidget {
           Container(
             width: 5, height: 22,
             decoration: BoxDecoration(
-              color: Colors.teal,
+              color: theme.colorScheme.primary,
               borderRadius: BorderRadius.circular(4),
             ),
           ),
           const SizedBox(width: 8),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleLarge!.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Colors.teal.shade700,
+          Expanded(
+            child: Text(
+              title,
+              style: theme.textTheme.titleLarge!.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -189,25 +223,28 @@ class RecipeDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildIngredients(List<String> ingredients) {
+  Widget _buildIngredients(ThemeData theme, List<String> ingredients) {
     return Card(
-      elevation: 8,
+      elevation: 4,
+      shadowColor: theme.colorScheme.shadow.withValues(alpha: 0.15),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: ingredients.map((i) => Container(
-            margin: const EdgeInsets.symmetric(vertical: 6),
-            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.symmetric(vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.teal.withValues(alpha: 0.05),
+              color: theme.colorScheme.primary.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.teal.shade600, size: 18),
-                const SizedBox(width: 8),
-                Expanded(child: Text(i, style: const TextStyle(fontSize: 15))),
+                Icon(Icons.check_circle, color: theme.colorScheme.primary, size: 18),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(i, style: theme.textTheme.bodyMedium?.copyWith(height: 1.4)),
+                ),
               ],
             ),
           )).toList(),
@@ -216,34 +253,38 @@ class RecipeDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSteps(List<String> steps) {
+  Widget _buildSteps(ThemeData theme, List<String> steps) {
     return Column(
       children: steps.asMap().entries.map((e) {
         final i = e.key + 1;
         return Card(
-          elevation: 4,
+          elevation: 3,
+          shadowColor: theme.colorScheme.shadow.withValues(alpha: 0.12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
-          margin: const EdgeInsets.only(bottom: 12),
+          margin: const EdgeInsetsDirectional.only(bottom: 12),
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 CircleAvatar(
-                  backgroundColor: Colors.teal,
+                  backgroundColor: theme.colorScheme.primary,
                   radius: 14,
                   child: Text(
                     "$i",
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(
+                      color: theme.colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     e.value,
-                    style: const TextStyle(fontSize: 15, height: 1.5),
+                    style: theme.textTheme.bodyLarge?.copyWith(height: 1.6),
                   ),
                 ),
               ],

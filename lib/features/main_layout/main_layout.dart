@@ -27,25 +27,33 @@ class _MainLayoutState extends State<MainLayout> {
     final selectedCategory = await showDialog<String>(
       context: context,
       builder: (context) {
+        final theme = Theme.of(context);
         return SimpleDialog(
-          backgroundColor: Colors.grey.shade100,
-          title: const Text(
+          backgroundColor: theme.colorScheme.surface,
+          title: Text(
             'اختر نوع الأكل',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.teal),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: theme.colorScheme.primary,
+            ),
           ),
           children: AppConstants.categories.map((cat) {
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsetsDirectional.symmetric(
+                horizontal: 12,
+                vertical: 6,
+              ),
               child: Material(
-                color: Colors.white,
+                color: theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(16),
                 elevation: 3,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
                   onTap: () => Navigator.pop(context, cat.name),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 14, horizontal: 16,
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      vertical: 14,
+                      horizontal: 16,
                     ),
                     child: Row(
                       children: [
@@ -57,8 +65,10 @@ class _MainLayoutState extends State<MainLayout> {
                         const SizedBox(width: 12),
                         Text(
                           cat.name,
-                          style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black87,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -77,15 +87,18 @@ class _MainLayoutState extends State<MainLayout> {
 
     final repo = RecipeRepository();
     final allRecipes = await repo.getAll();
-    final filteredRecipes = selectedCategory == AppConstants.categories.first.name
+    final filteredRecipes =
+        selectedCategory == AppConstants.categories.first.name
         ? allRecipes
-        : allRecipes.where((r) => r.category.contains(selectedCategory)).toList();
+        : allRecipes
+              .where((r) => r.category.contains(selectedCategory))
+              .toList();
 
     if (filteredRecipes.isEmpty) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('لا توجد وصفات لهذا القسم')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('لا توجد وصفات لهذا القسم')));
       return;
     }
 
@@ -100,6 +113,7 @@ class _MainLayoutState extends State<MainLayout> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       extendBody: true,
       body: _screens[_currentIndex],
@@ -110,15 +124,18 @@ class _MainLayoutState extends State<MainLayout> {
             const BannerAdWidget(),
             ConvexAppBar(
               style: TabStyle.reactCircle,
-              backgroundColor: Colors.teal.shade800,
-              activeColor: Colors.white,
-              color: Colors.white70,
+              backgroundColor: theme.colorScheme.surface,
+              activeColor: theme.colorScheme.secondary,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               elevation: 14,
               height: 64,
               items: const [
                 TabItem(icon: Icons.food_bank_rounded, title: 'المواعين'),
                 TabItem(icon: Icons.home_rounded, title: 'الوصفات'),
-                TabItem(icon: Icons.restaurant_menu_rounded, title: 'عجلة الأكل'),
+                TabItem(
+                  icon: Icons.restaurant_menu_rounded,
+                  title: 'عجلة الأكل',
+                ),
               ],
               initialActiveIndex: _currentIndex,
               onTap: (index) {

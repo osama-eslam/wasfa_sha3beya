@@ -13,17 +13,19 @@ class CategoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
     return SizedBox(
       height: 60,
       child: Stack(
         children: [
           AnimatedAlign(
             alignment: Alignment(
-              -1.0 +
+              (isRtl ? 1.0 : -1.0) +
                   (AppConstants.categories.indexWhere(
                         (c) => c.name == selectedCategory,
                       ) *
-                      2 /
+                      (isRtl ? -2 : 2) /
                       (AppConstants.categories.length - 1)),
               0,
             ),
@@ -48,7 +50,7 @@ class CategoryRow extends StatelessWidget {
               final isSelected = cat.name == selectedCategory;
 
               return Padding(
-                padding: const EdgeInsets.only(left: 8),
+                padding: EdgeInsetsDirectional.only(start: 8),
                 child: GestureDetector(
                   onTap: () => onCategorySelected(cat.name),
                   child: AnimatedContainer(
@@ -58,8 +60,16 @@ class CategoryRow extends StatelessWidget {
                       horizontal: 14, vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: isSelected ? cat.color : Colors.grey[200],
+                      color: isSelected
+                          ? cat.color
+                          : theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isSelected
+                            ? cat.color
+                            : theme.colorScheme.outline,
+                        width: isSelected ? 0 : 1,
+                      ),
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
@@ -74,7 +84,7 @@ class CategoryRow extends StatelessWidget {
                       children: [
                         Icon(
                           cat.icon,
-                          color: isSelected ? Colors.white : Colors.black87,
+                          color: isSelected ? Colors.white : theme.colorScheme.onSurfaceVariant,
                           size: 20,
                         ),
                         const SizedBox(width: 6),
@@ -82,7 +92,7 @@ class CategoryRow extends StatelessWidget {
                           cat.name,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: isSelected ? Colors.white : Colors.black87,
+                            color: isSelected ? Colors.white : theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],

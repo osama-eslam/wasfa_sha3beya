@@ -3,11 +3,12 @@ import 'package:get/get.dart';
 import 'package:wasfa_sha3beya/core/app_constants.dart';
 import 'package:wasfa_sha3beya/core/services/image_service.dart';
 import 'package:wasfa_sha3beya/data/models/recipe.dart';
+import 'package:wasfa_sha3beya/features/detail/recipe_detail_page.dart';
 import 'package:wasfa_sha3beya/features/home/controllers/home_controller.dart';
 import 'package:wasfa_sha3beya/features/home/widgets/category_row.dart';
 import 'package:wasfa_sha3beya/features/home/widgets/recipe_card.dart';
 import 'package:wasfa_sha3beya/features/home/widgets/search_card.dart';
-import 'package:wasfa_sha3beya/features/detail/recipe_detail_page.dart';
+import 'package:wasfa_sha3beya/features/main_layout/widgets/app_drawer.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -28,13 +29,11 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      endDrawer: const AppDrawer(),
       appBar: AppBar(
-        title: const Text('يا ترى هتاكل اي ؟'),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: Colors.teal,
+        title: const Text('يا ترى هتاكل إيه؟'),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Padding(
@@ -46,35 +45,39 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: ImageService.assetImage(
-              AppConstants.backgroundImage,
-              fit: BoxFit.cover,
-              color: Colors.black.withValues(alpha: 0.15),
-              colorBlendMode: BlendMode.darken,
-            ),
-          ),
-          Obx(() {
-            if (_ctrl.isLoading.value) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Column(
-                children: [
-                  Obx(() => CategoryRow(
-                    selectedCategory: _ctrl.selectedCategory.value,
-                    onCategorySelected: (name) => _ctrl.selectCategory(name),
-                  )),
-                  const SizedBox(height: 12),
-                  Expanded(child: _buildGrid()),
-                ],
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: ImageService.assetImage(
+                AppConstants.backgroundImage,
+                fit: BoxFit.cover,
+                color: theme.brightness == Brightness.dark
+                    ? Colors.black.withValues(alpha: 0.4)
+                    : Colors.black.withValues(alpha: 0.1),
+                colorBlendMode: BlendMode.darken,
               ),
-            );
-          }),
-        ],
+            ),
+            Obx(() {
+              if (_ctrl.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Column(
+                  children: [
+                    Obx(() => CategoryRow(
+                      selectedCategory: _ctrl.selectedCategory.value,
+                      onCategorySelected: (name) => _ctrl.selectCategory(name),
+                    )),
+                    const SizedBox(height: 12),
+                    Expanded(child: _buildGrid()),
+                  ],
+                ),
+              );
+            }),
+          ],
+        ),
       ),
     );
   }
@@ -84,23 +87,28 @@ class _HomePageState extends State<HomePage> {
       final list = _ctrl.filteredRecipes;
       if (list.isEmpty) return const Center(child: Text('لا توجد وصفات'));
 
-      return GridView.builder(
-        cacheExtent: 1000,
-        addAutomaticKeepAlives: true,
-        itemCount: list.length,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 0.72,
-        ),
-        itemBuilder: (context, index) {
-          final r = list[index];
-          return RecipeCard(
-            key: ValueKey(r.id),
-            recipe: r,
-            delay: index * 40,
-            onTap: () => _openDetail(r),
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final crossAxisCount = constraints.maxWidth > 600 ? 3 : 2;
+          return GridView.builder(
+            cacheExtent: 1000,
+            addAutomaticKeepAlives: true,
+            itemCount: list.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.72,
+            ),
+            itemBuilder: (context, index) {
+              final r = list[index];
+              return RecipeCard(
+                key: ValueKey(r.id),
+                recipe: r,
+                delay: index * 40,
+                onTap: () => _openDetail(r),
+              );
+            },
           );
         },
       );

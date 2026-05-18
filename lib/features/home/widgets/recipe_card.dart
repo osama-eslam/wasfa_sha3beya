@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:wasfa_sha3beya/core/services/image_service.dart';
 import 'package:wasfa_sha3beya/core/widgets/time_chip.dart';
 import 'package:wasfa_sha3beya/data/models/recipe.dart';
+import 'package:wasfa_sha3beya/features/favorites/controllers/favorites_controller.dart';
 
 class RecipeCard extends StatefulWidget {
   final Recipe recipe;
@@ -61,6 +63,7 @@ class _RecipeCardState extends State<RecipeCard>
     final recipe = widget.recipe;
     final theme = Theme.of(context);
     final firstStep = recipe.steps.isNotEmpty ? recipe.steps.first : '';
+    final favCtrl = Get.find<FavoritesController>();
 
     return SlideTransition(
       position: _slideAnim,
@@ -73,18 +76,50 @@ class _RecipeCardState extends State<RecipeCard>
               borderRadius: BorderRadius.circular(22),
             ),
             elevation: 6,
+            shadowColor: theme.colorScheme.shadow.withValues(alpha: 0.2),
             clipBehavior: Clip.antiAlias,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
-                  child: Hero(
-                    tag: recipe.id,
-                    child: ImageService.networkImage(
-                      recipe.imageUrl,
-                      fit: BoxFit.cover,
-                      memCacheWidth: ImageService.gridThumbnailWidth,
-                    ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Hero(
+                        tag: recipe.id,
+                        child: ImageService.networkImage(
+                          recipe.imageUrl,
+                          fit: BoxFit.cover,
+                          memCacheWidth: ImageService.gridThumbnailWidth,
+                        ),
+                      ),
+                      Positioned(
+                        top: 6,
+                        right: 6,
+                        child: Obx(() {
+                          final fav = favCtrl.isFavorite(recipe.id);
+                          return GestureDetector(
+                            onTap: () => favCtrl.toggle(recipe.id),
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surface.withValues(alpha: 0.7),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                fav
+                                    ? Icons.favorite_rounded
+                                    : Icons.favorite_border_rounded,
+                                color: fav
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                                size: 20,
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                    ],
                   ),
                 ),
                 Padding(
@@ -94,53 +129,42 @@ class _RecipeCardState extends State<RecipeCard>
                     children: [
                       Text(
                         recipe.title,
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleSmall!.copyWith(
                           fontWeight: FontWeight.bold,
+                          height: 1.2,
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        firstStep,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall!.copyWith(
-                          color: Colors.grey[700],
+                      if (firstStep.isNotEmpty)
+                        Text(
+                          firstStep,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall!.copyWith(
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                            height: 1.3,
+                          ),
                         ),
-                      ),
                       const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Flexible(
-                            child: TimeChip(
-                              icon: Icons.schedule,
-                              value: recipe.prepTime,
-                            ),
-                          ),
-                          const Spacer(),
-                          TextButton(
-                            onPressed: widget.onTap,
-                            style: TextButton.styleFrom(
-                              minimumSize: Size.zero,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 6,
-                              ),
-                              backgroundColor: Colors.teal.withValues(alpha: 0.15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
+                      Directionality(
+                        textDirection: TextDirection.ltr,
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: TimeChip(
+                                icon: Icons.schedule,
+                                value: recipe.prepTime,
                               ),
                             ),
-                            child: Text(
-                              'شوف',
-                              style: TextStyle(
-                                color: Colors.teal.shade700,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
+                            const Spacer(),
+                            TextButton(
+                              onPressed: widget.onTap,
+                              child: const Text('شوف'),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),

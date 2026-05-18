@@ -1,8 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Required for Advertising ID access (Android 13+) -->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
+
     <application
-        android:label="وصفه شعبيه"
+        android:label="مطبخ العيلة"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <!-- Production APPLICATION_ID (test device registered in code) -->

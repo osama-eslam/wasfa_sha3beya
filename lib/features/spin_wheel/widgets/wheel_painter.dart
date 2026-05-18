@@ -4,8 +4,9 @@ import 'package:wasfa_sha3beya/data/models/recipe.dart';
 
 class WheelPainter extends CustomPainter {
   final List<Recipe> recipes;
+  final ColorScheme colorScheme;
 
-  WheelPainter(this.recipes);
+  WheelPainter(this.recipes, this.colorScheme);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -17,10 +18,15 @@ class WheelPainter extends CustomPainter {
       final paint = Paint()
         ..style = PaintingStyle.fill
         ..shader = RadialGradient(
-          colors: [
-            i % 2 == 0 ? Colors.teal.shade400 : Colors.teal.shade300,
-            Colors.teal.shade50,
-          ],
+          colors: i % 2 == 0
+              ? [
+                  colorScheme.primary.withValues(alpha: 0.9),
+                  colorScheme.primary.withValues(alpha: 0.6),
+                ]
+              : [
+                  colorScheme.tertiary.withValues(alpha: 0.9),
+                  colorScheme.tertiary.withValues(alpha: 0.6),
+                ],
           center: Alignment.center,
           radius: 1.0,
         ).createShader(Rect.fromCircle(center: center, radius: radius));
@@ -34,8 +40,8 @@ class WheelPainter extends CustomPainter {
       );
 
       final borderPaint = Paint()
-        ..color = Colors.white.withValues(alpha: 0.8)
-        ..strokeWidth = 2
+        ..color = colorScheme.secondary.withValues(alpha: 0.35)
+        ..strokeWidth = 1.5
         ..style = PaintingStyle.stroke;
       canvas.drawArc(
         Rect.fromCircle(center: center, radius: radius),
@@ -45,12 +51,16 @@ class WheelPainter extends CustomPainter {
         borderPaint,
       );
 
+      final textColor = i % 2 == 0
+          ? colorScheme.onPrimary
+          : colorScheme.onTertiary;
+
       final textPainter = TextPainter(
         text: TextSpan(
           text: '${i + 1}',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
-            color: Colors.white,
+            color: textColor,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -66,6 +76,23 @@ class WheelPainter extends CustomPainter {
       );
       textPainter.paint(canvas, offset);
     }
+
+    final outerBorderPaint = Paint()
+      ..color = colorScheme.secondary.withValues(alpha: 0.5)
+      ..strokeWidth = 3
+      ..style = PaintingStyle.stroke;
+    canvas.drawCircle(center, radius, outerBorderPaint);
+
+    final centerPaint = Paint()
+      ..color = colorScheme.surface
+      ..style = PaintingStyle.fill;
+    canvas.drawCircle(center, radius * 0.08, centerPaint);
+
+    final centerBorderPaint = Paint()
+      ..color = colorScheme.secondary
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+    canvas.drawCircle(center, radius * 0.08, centerBorderPaint);
   }
 
   @override

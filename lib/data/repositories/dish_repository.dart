@@ -5,6 +5,7 @@ import 'package:wasfa_sha3beya/data/models/dish_person.dart';
 
 class DishRepository {
   static const String _storageKey = 'dish_people';
+  static const String _customTasksKey = 'dish_custom_tasks';
 
   static Future<List<DishPerson>> loadPeople() async {
     try {
@@ -26,6 +27,25 @@ class DishRepository {
       await prefs.setString(_storageKey, data);
     } catch (e) {
       debugPrint('Error saving people: $e');
+    }
+  }
+
+  static Future<List<String>> loadCustomTasks() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getStringList(_customTasksKey) ?? [];
+    } catch (e) {
+      debugPrint('Error loading custom tasks: $e');
+      return [];
+    }
+  }
+
+  static Future<void> saveCustomTasks(List<String> tasks) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_customTasksKey, tasks);
+    } catch (e) {
+      debugPrint('Error saving custom tasks: $e');
     }
   }
 }

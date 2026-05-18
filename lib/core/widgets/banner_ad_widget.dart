@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:wasfa_sha3beya/core/services/ad_helper.dart';
 
-/// Self-managing anchored-adaptive banner ad widget.
-///
-/// Always occupies a fixed 60‑dp slot so the layout is stable.
-/// Shows a subtle grey placeholder while loading, and the real
-/// [AdWidget] once the ad is served.
 class BannerAdWidget extends StatefulWidget {
   const BannerAdWidget({super.key});
 
@@ -61,10 +56,11 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
       height: _bannerHeight,
-      color: Colors.grey[200],
+      color: theme.colorScheme.surfaceContainerHighest,
       alignment: Alignment.center,
       child: _loaded && _banner != null
           ? AdWidget(ad: _banner!)

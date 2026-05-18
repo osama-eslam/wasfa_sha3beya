@@ -79,12 +79,16 @@ class _SpinWheelPageState extends State<SpinWheelPage>
   }
 
   void _showWatchAdDialog() {
+    final cs = Theme.of(context).colorScheme;
     if (AdService.instance.isRewardedAdReady.value) {
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('انتهت المحاولات المجانية'),
-          content: const Text('شاهد فيديو للحصول على 3 محاولات إضافية'),
+          backgroundColor: cs.surface,
+          title: Text('انتهت المحاولات المجانية', style: TextStyle(color: cs.onSurface)),
+          content: Text('شاهد فيديو للحصول على 3 محاولات إضافية',
+            style: TextStyle(color: cs.onSurfaceVariant),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
@@ -95,7 +99,6 @@ class _SpinWheelPageState extends State<SpinWheelPage>
                 Navigator.pop(ctx);
                 _watchAdForSpins();
               },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
               child: const Text('شاهد فيديو'),
             ),
           ],
@@ -114,7 +117,6 @@ class _SpinWheelPageState extends State<SpinWheelPage>
         const SnackBar(
           content: Text('هدية: +3 محاولات إضافية! 🎁'),
           duration: Duration(seconds: 2),
-          behavior: SnackBarBehavior.floating,
         ),
       );
     }
@@ -145,83 +147,69 @@ class _SpinWheelPageState extends State<SpinWheelPage>
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        return AnimatedSlide(
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeOut,
-          offset: const Offset(0, 0),
-          child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 500),
-            opacity: 1,
-            child: Container(
-              height: MediaQuery.of(context).size.height * 0.65,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        final theme = Theme.of(context);
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.65,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Container(
+                width: 60, height: 6,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(3),
+                ),
               ),
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  Container(
-                    width: 60, height: 6,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade400,
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    "اليوم هناكل: ${_ctrl.selectedRecipe!.title} 🍴",
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.teal,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 20),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: ImageService.networkImage(
-                      _ctrl.selectedRecipe!.imageUrl,
-                      height: 250,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      memCacheWidth: ImageService.detailImageWidth,
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _isCardShown = false;
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              RecipeDetailPage(recipe: _ctrl.selectedRecipe!),
+              const SizedBox(height: 16),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "اليوم هناكل: ${_ctrl.selectedRecipe!.title} 🍴",
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.secondary,
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 60, vertical: 20,
+                        textAlign: TextAlign.center,
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
+                      const SizedBox(height: 16),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: ImageService.networkImage(
+                          _ctrl.selectedRecipe!.imageUrl,
+                          height: 220,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          memCacheWidth: ImageService.detailImageWidth,
+                        ),
                       ),
-                      elevation: 8,
-                    ),
-                    child: const Text(
-                      "ابدأ التحضير",
-                      style: TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold,
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          _isCardShown = false;
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  RecipeDetailPage(recipe: _ctrl.selectedRecipe!),
+                            ),
+                          );
+                        },
+                        child: const Text("ابدأ التحضير"),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         );
       },
@@ -232,23 +220,23 @@ class _SpinWheelPageState extends State<SpinWheelPage>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final size = MediaQuery.of(context).size.width * 0.85;
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.teal.shade700,
         centerTitle: true,
-        elevation: 8,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
-        ),
-        title: const Text(
-          "يا ترى هتاكل اي ؟",
-          style: TextStyle(
-            fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white,
+        title: const Text("يا ترى هتاكل اي ؟"),
+        leading: IconButton(
+          icon: Icon(
+            Directionality.of(context) == TextDirection.rtl
+                ? Icons.arrow_forward_ios
+                : Icons.arrow_back_ios,
           ),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
+
       body: Stack(
         children: [
           SizedBox.expand(
@@ -256,6 +244,7 @@ class _SpinWheelPageState extends State<SpinWheelPage>
               AppConstants.backgroundImage, fit: BoxFit.cover,
             ),
           ),
+          Container(color: theme.colorScheme.shadow.withValues(alpha: 0.5)),
           SafeArea(
             child: Column(
               children: [
@@ -288,10 +277,15 @@ class _SpinWheelPageState extends State<SpinWheelPage>
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black38,
-                                      blurRadius: 20,
-                                      offset: const Offset(5, 5),
-                                      spreadRadius: 3,
+                                      color: theme.colorScheme.shadow.withValues(alpha: 0.5),
+                                      blurRadius: 30,
+                                      offset: const Offset(0, 8),
+                                      spreadRadius: 2,
+                                    ),
+                                    BoxShadow(
+                                      color: theme.colorScheme.secondary.withValues(alpha: 0.08),
+                                      blurRadius: 30,
+                                      spreadRadius: 4,
                                     ),
                                   ],
                                 ),
@@ -299,7 +293,10 @@ class _SpinWheelPageState extends State<SpinWheelPage>
                                   angle: _ctrl.angle,
                                   child: CustomPaint(
                                     size: Size(size, size),
-                                    painter: WheelPainter(widget.recipes),
+                                    painter: WheelPainter(
+                                      widget.recipes,
+                                      theme.colorScheme,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -308,12 +305,16 @@ class _SpinWheelPageState extends State<SpinWheelPage>
                                 child: Icon(
                                   Icons.arrow_drop_down_circle,
                                   size: 60,
-                                  color: Colors.redAccent,
-                                  shadows: const [
+                                  color: theme.colorScheme.secondary,
+                                  shadows: [
                                     Shadow(
-                                      blurRadius: 8,
-                                      color: Colors.black38,
-                                      offset: Offset(2, 2),
+                                      blurRadius: 10,
+                                      color: theme.colorScheme.shadow.withValues(alpha: 0.5),
+                                      offset: const Offset(0, 3),
+                                    ),
+                                    Shadow(
+                                      blurRadius: 16,
+                                      color: theme.colorScheme.secondary.withValues(alpha: 0.3),
                                     ),
                                   ],
                                 ),
@@ -324,9 +325,9 @@ class _SpinWheelPageState extends State<SpinWheelPage>
                         const SizedBox(height: 16),
                         Text(
                           'المحاولات المتبقية: $_freeSpins',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
-                            color: Colors.black54,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -335,19 +336,17 @@ class _SpinWheelPageState extends State<SpinWheelPage>
                           onPressed: _startSpin,
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 60, vertical: 20,
+                              horizontal: 50, vertical: 18,
                             ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(50),
                             ),
-                            backgroundColor: Colors.teal.shade600,
-                            elevation: 12,
-                            shadowColor: Colors.teal.shade300,
                           ),
                           child: Text(
                             _ctrl.isSpinning ? "لف العجلة..." : "أكلة اليوم",
-                            style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),

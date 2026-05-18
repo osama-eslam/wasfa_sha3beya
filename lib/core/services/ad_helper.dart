@@ -33,19 +33,19 @@ class AdService {
   /// Awaits [MobileAds.instance.initialize], registers [testDeviceId]
   /// as a test device, loads spin counters, then preloads the rewarded ad.
   static Future<void> init({String? testDeviceId}) async {
-    print('━━━ AdService.init ━━━');
+    debugPrint('━━━ AdService.init ━━━');
     try {
       await MobileAds.instance.initialize();
-      print('✅ AdService: MobileAds initialized');
+      debugPrint('✅ AdService: MobileAds initialized');
     } catch (e) {
-      print('❌ AdService: MobileAds.initialize threw: $e');
+      debugPrint('❌ AdService: MobileAds.initialize threw: $e');
     }
 
     if (testDeviceId != null) {
       MobileAds.instance.updateRequestConfiguration(
         RequestConfiguration(testDeviceIds: [testDeviceId]),
       );
-      print('📱 AdService: Test device registered: $testDeviceId');
+      debugPrint('📱 AdService: Test device registered: $testDeviceId');
     }
 
     await _instance._loadSpinCounts();
@@ -181,7 +181,7 @@ class AdService {
         isRewardedAdLoading.value = false;
         adStatusMessage.value =
             'يستغرق الإعلان وقتًا أطول من المعتاد، جارٍ إعادة المحاولة في الخلفية...';
-        print(
+        debugPrint(
           '⏰ AdService: Load timed out after ${_timeoutDuration.inSeconds}s'
           ' — retrying in background',
         );
@@ -196,12 +196,12 @@ class AdService {
   /// exception does NOT leave [isRewardedAdLoading] stuck at true.
   void _preloadRewardedAd() {
     if (_cooldownActive) {
-      print('⏳ AdService: Skipping load — cooldown active');
+      debugPrint('⏳ AdService: Skipping load — cooldown active');
       return;
     }
 
     if (isRewardedAdLoading.value && _loadAttempts > 0) {
-      print('⚠️ AdService: Detected stuck loading state — force resetting');
+      debugPrint('⚠️ AdService: Detected stuck loading state — force resetting');
       _forceReset();
     }
 
@@ -209,7 +209,7 @@ class AdService {
     _loadAttempts++;
     _startTimeout();
 
-    print(
+    debugPrint(
       '━━━ 📡 AdService: Loading rewarded ad (attempt $_loadAttempts) ━━━',
     );
 
@@ -227,7 +227,7 @@ class AdService {
             isRewardedAdTimedOut.value = false;
             lastAdError = null;
             adStatusMessage.value = 'الإعلان جاهز';
-            print('━━━ ✅ AdService: Rewarded ad LOADED ━━━');
+            debugPrint('━━━ ✅ AdService: Rewarded ad LOADED ━━━');
           },
           onAdFailedToLoad: (error) {
             _cancelTimeout();
@@ -260,26 +260,26 @@ class AdService {
                 errorType = 'UNKNOWN';
             }
 
-            print(
+            debugPrint(
               '━━━ ❌ AdService: Rewarded ad FAILED'
               ' (retry $_retryCount/$_maxRetries) ━━━',
             );
-            print('    Error code : $code ($errorType)');
-            print('    Error msg  : $msg');
+            debugPrint('    Error code : $code ($errorType)');
+            debugPrint('    Error msg  : $msg');
 
             if (_retryCount <= _maxRetries) {
               final delay =
                   Duration(seconds: pow(2, _retryCount).toInt());
-              print('🔁 AdService: Retrying in ${delay.inSeconds}s…');
+              debugPrint('🔁 AdService: Retrying in ${delay.inSeconds}s…');
               Future.delayed(delay, _preloadRewardedAd);
             } else {
-              print(
+              debugPrint(
                 '⏸️  AdService: Max retries reached —'
                 ' cooling down for $_cooldownMinutes min',
               );
               _cooldownActive = true;
               Future.delayed(Duration(minutes: _cooldownMinutes), () {
-                print('🔄 AdService: Cooldown over — restarting preload');
+                debugPrint('🔄 AdService: Cooldown over — restarting preload');
                 _cooldownActive = false;
                 _retryCount = 0;
                 _loadAttempts = 0;
@@ -290,7 +290,7 @@ class AdService {
         ),
       );
     } catch (e) {
-      print('❌ AdService: RewardedAd.load THREW synchronously: $e');
+      debugPrint('❌ AdService: RewardedAd.load THREW synchronously: $e');
       _forceReset();
       Future.delayed(const Duration(seconds: 2), _preloadRewardedAd);
     }
@@ -310,12 +310,12 @@ class AdService {
   }) {
     final ad = _rewardedAd;
     if (ad == null) {
-      print('⚠️ AdService: showRewardedAd() called but no ad ready');
+      debugPrint('⚠️ AdService: showRewardedAd() called but no ad ready');
       _cancelTimeout();
       isRewardedAdTimedOut.value = false;
       adStatusMessage.value = null;
       if (_cooldownActive) {
-        print('♻️ AdService: Forcing early retry (was in cooldown)');
+        debugPrint('♻️ AdService: Forcing early retry (was in cooldown)');
         _cooldownActive = false;
         _retryCount = 0;
         _loadAttempts = 0;
@@ -329,7 +329,7 @@ class AdService {
 
     ad.fullScreenContentCallback = FullScreenContentCallback(
       onAdDismissedFullScreenContent: (ad) {
-        print('━━━ 👋 AdService: Ad dismissed by user ━━━');
+        debugPrint('━━━ 👋 AdService: Ad dismissed by user ━━━');
         ad.dispose();
         _rewardedAd = null;
         isRewardedAdReady.value = false;
@@ -340,7 +340,7 @@ class AdService {
       onAdFailedToShowFullScreenContent: (ad, error) {
         lastAdError =
             'show_failed: code=${error.code} msg=${error.message}';
-        print('━━━ ❌ AdService: Failed to show ad — $lastAdError ━━━');
+        debugPrint('━━━ ❌ AdService: Failed to show ad — $lastAdError ━━━');
         ad.dispose();
         _rewardedAd = null;
         isRewardedAdReady.value = false;
@@ -351,7 +351,7 @@ class AdService {
     );
 
     ad.show(onUserEarnedReward: (ad, reward) {
-      print(
+      debugPrint(
         '━━━ 🎁 AdService: REWARD EARNED —'
         ' type=${reward.type} amount=${reward.amount} ━━━',
       );
@@ -362,7 +362,7 @@ class AdService {
   /// Force a fresh load (clears cooldown).
   void retryLoad() {
     _forceReset();
-    print('🔄 AdService: Manual retry requested');
+    debugPrint('🔄 AdService: Manual retry requested');
     _preloadRewardedAd();
   }
 }

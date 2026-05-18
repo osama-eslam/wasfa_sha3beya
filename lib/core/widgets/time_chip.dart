@@ -8,24 +8,31 @@ class TimeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         gradient: LinearGradient(
-          colors: [Colors.teal.shade300, Colors.teal.shade500],
+          colors: [
+            theme.colorScheme.primary.withValues(alpha: 0.7),
+            theme.colorScheme.primary,
+          ],
         ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: Colors.white),
+          Icon(icon, size: 12, color: theme.colorScheme.onPrimary),
           const SizedBox(width: 4),
           Flexible(
             child: Text(
               value,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 10, color: Colors.white),
+              style: TextStyle(
+                fontSize: 10,
+                color: theme.colorScheme.onPrimary,
+              ),
             ),
           ),
         ],
