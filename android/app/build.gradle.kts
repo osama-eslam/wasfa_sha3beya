@@ -50,7 +50,7 @@ signingConfigs {
     applicationId = "com.magic.recipes.wasfa_sha3beya"
     minSdk = flutter.minSdkVersion
     targetSdk = 35
-    versionCode = 6
+    versionCode = 10
     versionName = "1.1"
 }
 
