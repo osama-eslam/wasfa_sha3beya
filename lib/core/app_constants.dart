@@ -19,5 +19,6 @@ class AppConstants {
     CategoryInfo('محاشي', Icons.restaurant_rounded, Colors.green),
     CategoryInfo('شوربة', Icons.soup_kitchen_rounded, Colors.redAccent),
     CategoryInfo('مشاوي', Icons.local_fire_department_rounded, Colors.deepOrange),
+    CategoryInfo('أكلات عيد الأضحى', Icons.celebration_rounded, Color(0xFFD4A017)),
   ];
 }

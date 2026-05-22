@@ -35,6 +35,11 @@ class RecipeDetailPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (recipe.cleaningMethod.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: _buildCleaningMethodButton(context, theme),
+                        ),
                       FadeInSlide(delay: 200, child: _buildInfoSection(theme)),
                       const SizedBox(height: 20),
                       FadeInSlide(
@@ -170,6 +175,141 @@ class RecipeDetailPage extends StatelessWidget {
             ),
             onPressed: () => Navigator.pop(context),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCleaningMethodButton(BuildContext context, ThemeData theme) {
+    return GestureDetector(
+      onTap: () => _showCleaningSheet(context, theme),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              theme.colorScheme.primary,
+              theme.colorScheme.primary.withValues(alpha: 0.7),
+            ],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: theme.colorScheme.primary.withValues(alpha: 0.35),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.cleaning_services_rounded,
+              color: theme.colorScheme.onPrimary,
+              size: 22,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              'اعرض طريقة التنظيف',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showCleaningSheet(BuildContext context, ThemeData theme) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 48,
+              height: 4,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.cleaning_services_rounded,
+                color: theme.colorScheme.primary,
+                size: 28,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'طريقة التنظيف',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.15),
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.lightbulb_outline_rounded,
+                    color: theme.colorScheme.primary,
+                    size: 22,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      recipe.cleaningMethod,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        height: 1.6,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('تم'),
+              ),
+            ),
+          ],
         ),
       ),
     );

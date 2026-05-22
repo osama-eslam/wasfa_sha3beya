@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -63,7 +62,8 @@ class ImageService {
     int? memCacheWidth,
     int? memCacheHeight,
   }) {
-    final placeholderPath = _placeholderAssets[Random().nextInt(3)];
+    final index = (imageUrl.hashCode % _placeholderAssets.length).abs();
+    final placeholderPath = _placeholderAssets[index];
 
     return CachedNetworkImage(
       imageUrl: imageUrl,
@@ -73,8 +73,8 @@ class ImageService {
       fit: fit,
       memCacheWidth: memCacheWidth,
       memCacheHeight: memCacheHeight,
-      fadeInDuration: const Duration(milliseconds: 400),
-      fadeOutDuration: const Duration(milliseconds: 200),
+      fadeInDuration: const Duration(milliseconds: 250),
+      fadeOutDuration: Duration.zero,
       placeholder: (context, url) => Image.asset(
         placeholderPath,
         width: width,

@@ -9,6 +9,7 @@ class Recipe {
   final String cookTime;
   final String category;
   final String extra;
+  final String cleaningMethod;
 
   Recipe({
     required this.id,
@@ -21,6 +22,7 @@ class Recipe {
     required this.cookTime,
     required this.category,
     required this.extra,
+    this.cleaningMethod = '',
   });
 
   factory Recipe.fromMap(Map<String, dynamic> m, int index) {
@@ -35,6 +37,7 @@ class Recipe {
       cookTime: '',
       category: m['type'] ?? '',
       extra: m['extra'] ?? '',
+      cleaningMethod: m['cleaningMethod'] ?? '',
     );
   }
 

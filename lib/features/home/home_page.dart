@@ -4,8 +4,10 @@ import 'package:wasfa_sha3beya/core/app_constants.dart';
 import 'package:wasfa_sha3beya/core/services/image_service.dart';
 import 'package:wasfa_sha3beya/data/models/recipe.dart';
 import 'package:wasfa_sha3beya/features/detail/recipe_detail_page.dart';
+import 'package:wasfa_sha3beya/features/eid/eid_recipes_page.dart';
 import 'package:wasfa_sha3beya/features/home/controllers/home_controller.dart';
 import 'package:wasfa_sha3beya/features/home/widgets/category_row.dart';
+import 'package:wasfa_sha3beya/features/home/widgets/eid_category_card.dart';
 import 'package:wasfa_sha3beya/features/home/widgets/recipe_card.dart';
 import 'package:wasfa_sha3beya/features/home/widgets/search_card.dart';
 import 'package:wasfa_sha3beya/features/main_layout/widgets/app_drawer.dart';
@@ -63,14 +65,29 @@ class _HomePageState extends State<HomePage> {
                 return const Center(child: CircularProgressIndicator());
               }
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Column(
                   children: [
-                    Obx(() => CategoryRow(
-                      selectedCategory: _ctrl.selectedCategory.value,
-                      onCategorySelected: (name) => _ctrl.selectCategory(name),
-                    )),
+                    Obx(
+                      () => CategoryRow(
+                        selectedCategory: _ctrl.selectedCategory.value,
+                        onCategorySelected: (name) {
+                          if (name == 'أكلات عيد الأضحى') {
+                            _openEidPage();
+                          } else {
+                            _ctrl.selectCategory(name);
+                          }
+                        },
+                      ),
+                    ),
                     const SizedBox(height: 12),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: EidCategoryCard(onTap: _openEidPage),
+                    ),
                     Expanded(child: _buildGrid()),
                   ],
                 ),
@@ -116,7 +133,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _openDetail(Recipe r) {
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => RecipeDetailPage(recipe: r)));
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => RecipeDetailPage(recipe: r)));
+  }
+
+  void _openEidPage() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const EidRecipesPage()));
   }
 }

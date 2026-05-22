@@ -7,7 +7,7 @@ class ThemeController extends GetxController {
   static ThemeController get to => Get.find();
   static const String _themeKey = 'theme_index';
 
-  final RxInt _themeIndex = 0.obs;
+  final RxInt _themeIndex = 1.obs;
 
   int get themeIndex => _themeIndex.value;
 
@@ -16,7 +16,7 @@ class ThemeController extends GetxController {
 
   Future<void> loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
-    _themeIndex.value = prefs.getInt(_themeKey) ?? 0;
+    _themeIndex.value = prefs.getInt(_themeKey) ?? 1;
   }
 
   void switchTheme(int index) {
